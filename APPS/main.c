@@ -1,41 +1,32 @@
 
 #include "../MCAL/F88_UART.h"
-#include "../MCAL/F88_SPI.h"
+#include "../HAL/F88_RTC.h"
 #include <util/delay.h>
+#include <stdio.h>
 
-//#define MASTER_SPI
-#define SLAVE_SPI
 
 int main()
 {
-
-#ifdef MASTER_SPI
-	F88_void_SPI_init(MASTER);
-#endif
-
-#ifdef SLAVE_SPI
-	F88_void_SPI_init(SLAVE);
-#endif
-
 	F88_void_UART_init(9600);
+	F88_void_RTC_Init();
 
+
+	unsigned char ss , mm ,hh;
+	unsigned char data[100];
 	while(1)
 	{
-#ifdef MASTER_SPI
 
-		F88_void_SPI_Write('A');
-		_delay_ms(1);
-		F88_void_SPI_Write('B');
-		_delay_ms(1);
-		F88_void_SPI_Write('C');
+		F88_void_RTC_GetTime(&ss , &mm ,&hh);
+
+		int size = sprintf((char *)data , "Time : %d:%d:%d \n" , hh , mm ,ss);
+
+		for (int index = 0 ; index < size ; index++)
+			F88_void_UART_Write(data[index]);
+
 		_delay_ms(1000);
-#endif
 
-#ifdef SLAVE_SPI
 
-		unsigned char data = F88_unsigned_char_SPI_Read();
-		F88_void_UART_Write(data);
-#endif
+
 
 
 	}
